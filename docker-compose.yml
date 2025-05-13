@@ -1,0 +1,13 @@
+# Use root/admin as user/password credentials
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: necta  # Add this line to create the 'necta' database
+    ports:
+      - "27018:27017"
