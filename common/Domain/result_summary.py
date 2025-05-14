@@ -35,6 +35,11 @@ class CandidatesResultSummary:
                  division_three: PerDivisionSummary = None,
                  division_four: PerDivisionSummary = None,
                  division_zero: PerDivisionSummary = None,
+                 absent: PerDivisionSummary = None,
+                 result_withheld: PerDivisionSummary = None,
+                 e_star: PerDivisionSummary = None,
+                 withdrawn: PerDivisionSummary = None,
+                 special_pass: PerDivisionSummary = None
                  ):
         self.id = id
         self.division_one = division_one
@@ -42,6 +47,11 @@ class CandidatesResultSummary:
         self.division_three = division_three
         self.division_four = division_four
         self.division_zero = division_zero
+        self.absent = absent
+        self.result_withheld = result_withheld
+        self.e_star = e_star
+        self.withdrawn = withdrawn
+        self.special_pass = special_pass
 
     def __str__(self):
         return (f"id: {self.id}, "
@@ -49,7 +59,12 @@ class CandidatesResultSummary:
                 f" Division II: {self.division_two}, "
                 f"Division III: {self.division_three}, "
                 f"Division IV: {self.division_four}, "
-                f"Division Zero: {self.division_zero}")
+                f"Division Zero: {self.division_zero}"
+                f" Division Absent: {self.absent}, "
+                f" Division Result Withheld: {self.result_withheld}, "
+                f" Division E*: {self.e_star}," 
+                f" Division Withdrawn: {self.withdrawn}, "
+                f" Division Special Pass: {self.special_pass}")
 
     def to_dict(self):
         return {
@@ -58,7 +73,12 @@ class CandidatesResultSummary:
             "divisionTwo": self.division_two.to_dict() if self.division_two else None,
             "divisionThree": self.division_three.to_dict() if self.division_three else None,
             "divisionFour": self.division_four.to_dict() if self.division_four else None,
-            "divisionZero": self.division_zero.to_dict() if self.division_zero else None
+            "divisionZero": self.division_zero.to_dict() if self.division_zero else None,
+            "absent": self.absent.to_dict() if self.absent else None,
+            "resultWithheld": self.result_withheld.to_dict() if self.result_withheld else None,
+            "eStar": self.e_star.to_dict() if self.e_star else None,
+            "withdrawn": self.withdrawn.to_dict() if self.withdrawn else None,
+            "specialPass": self.special_pass.to_dict() if self.special_pass else None
         }
 
     @staticmethod
@@ -69,7 +89,12 @@ class CandidatesResultSummary:
             division_two=PerDivisionSummary.from_dict(data["divisionTwo"]),
             division_three=PerDivisionSummary.from_dict(data["divisionThree"]),
             division_four=PerDivisionSummary.from_dict(data["divisionFour"]),
-            division_zero=PerDivisionSummary.from_dict(data["divisionZero"])
+            division_zero=PerDivisionSummary.from_dict(data["divisionZero"]),
+            absent=PerDivisionSummary.from_dict(data["absent"]),
+            result_withheld=PerDivisionSummary.from_dict(data["resultWithheld"]),
+            e_star=PerDivisionSummary.from_dict(data["eStar"]),
+            withdrawn=PerDivisionSummary.from_dict(data["withdrawn"]),
+            special_pass=PerDivisionSummary.from_dict(data["specialPass"])
         )
 
     def __eq__(self, other):
@@ -80,4 +105,9 @@ class CandidatesResultSummary:
             self.division_two == other.division_two and \
             self.division_three == other.division_three and \
             self.division_four == other.division_four and \
-            self.division_zero == other.division_zero
+            self.division_zero == other.division_zero and \
+            self.absent == other.absent and \
+            self.result_withheld == other.result_withheld and \
+            self.e_star == other.e_star and \
+            self.withdrawn == other.withdrawn and \
+            self.special_pass == other.special_pass
