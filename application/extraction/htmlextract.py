@@ -1,6 +1,6 @@
 import re
 
-from application.scrapper import fetcher
+from application.scrapper.service import fetcher
 
 
 class HtmlExtract:
@@ -55,7 +55,7 @@ class HtmlExtract:
         """""
         Get results links, in this context. All centre
         """""
-        soup = self.fetcher.from_website(url)
+        soup = self.fetcher.from_website(url) # Get the soup object, Can come back as an empty soup object
         links = []
         for link in soup.find_all(href=reg_filter):
             links.append(link)
