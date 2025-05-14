@@ -32,7 +32,6 @@ class Fetcher:
             # Try adding a fallback mechanism, some urls have alevel.html at the end
             # Add the alevel.html and try again
             fallback_url = url.rstrip('/') + FALL_BACK_PATH # Construct fallback URL
-            print(f"Initial fetch failed: {initial_e}. Trying fallback URL: {fallback_url}")
             try:
                 return self._fetch_html(fallback_url)
             except requests.exceptions.RequestException as fallback_e:
