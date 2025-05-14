@@ -1,4 +1,4 @@
-from application.scrapper import fetcher
+from application.scrapper.service import fetcher
 
 
 class XlsxExtractor:
