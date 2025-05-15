@@ -15,6 +15,7 @@ class DivisionEnum(str, Enum):
     E_STAR = "*E"
     WITHDRAWN = "*W"  # Withdrawn
     S_STAR = "*S"  # Special Pass
+    NONE = "None"  # No division
 
     def __new__(cls, value, label=None):
         member = str.__new__(cls, value)
