@@ -35,10 +35,10 @@ class Fetcher:
             try:
                 return self._fetch_html(fallback_url)
             except requests.exceptions.RequestException as fallback_e:
-                warnings.warn(f"Error fetching initial URL '{url}': {fallback_e}", RuntimeWarning)
+                # warnings.warn(f"Error fetching initial URL '{url}': {fallback_e}", RuntimeWarning)
                 return BeautifulSoup("", 'html.parser')  # Return empty soup if fallback fails
         except Exception as e:
-            warnings.warn(f"Error fetching initial URL '{url}': {e}", RuntimeWarning)
+            # warnings.warn(f"Error fetching initial URL '{url}': {e}", RuntimeWarning)
             raise WebsiteFetchError(f"Error fetching URL: {e}")
 
     @staticmethod
