@@ -2,6 +2,7 @@ from datetime import datetime
 
 from common.Domain.change_logs import ChangeLog
 from common.Enumerations.small_enumarations import InstitutionTypeEnum
+from common.Domain.meta_data import Metadata
 
 
 class CenterDocument:
@@ -29,7 +30,7 @@ class CenterDocument:
             "current": self.current.to_dict(),
             "dataVersion": self.data_version,
             "snapshot": [snapshot.to_dict() for snapshot in self.snapshot] if self.snapshot else None,
-            "changeLogs": self.change_logs,
+            "changeLogs": [change_log.to_dict() for change_log in self.change_logs] if self.change_logs else None,
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
         }
@@ -78,6 +79,7 @@ class CurrentCenterData:
             ward: str,
             ownership: str,
             institutionType: InstitutionTypeEnum,
+            metadata: list[Metadata] = None,
     ):
         self.name = name
         self.region = region
@@ -85,6 +87,7 @@ class CurrentCenterData:
         self.ward = ward
         self.ownership = ownership
         self.institutionType = institutionType
+        self.metadata = metadata if metadata else []
 
     def to_dict(self):
         return {
@@ -93,7 +96,8 @@ class CurrentCenterData:
             "council": self.council,
             "ward": self.ward,
             "ownership": self.ownership,
-            "institutionType": self.institutionType.value
+            "institutionType": self.institutionType.value,
+            "metadata": [metadata.to_dict() for metadata in self.metadata] if self.metadata else None,
         }
 
     @staticmethod
@@ -104,5 +108,6 @@ class CurrentCenterData:
             council=data.get("council"),
             ward=data.get("ward"),
             ownership=data.get("ownership"),
-            institutionType=InstitutionTypeEnum(data.get("institutionType"))
+            institutionType=InstitutionTypeEnum(data.get("institutionType")),
+            metadata = [Metadata.from_dict(item) for item in data["metadata"]] if data.get("metadata") else None,
         )
