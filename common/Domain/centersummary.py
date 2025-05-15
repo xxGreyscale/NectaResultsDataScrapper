@@ -2,6 +2,7 @@ from datetime import datetime
 
 from common.Enumerations.small_enumarations import InstitutionTypeEnum
 from common.Primitives.center_id import CenterId
+from common.Domain.meta_data import Metadata
 
 
 class CenterSummary:
@@ -18,6 +19,7 @@ class CenterSummary:
             school_registration_number: str = None,
             created_at: datetime = None,
             updated_at: datetime = None,
+            meta_data: [Metadata] = None,
     ):
         self.name: str = name
         self.id = id
@@ -33,6 +35,7 @@ class CenterSummary:
             self.institution_type: InstitutionTypeEnum = institution_type
         self.created_at = created_at if created_at else datetime.now()
         self.updated_at = updated_at if updated_at else datetime.now()
+        self.meta_data = meta_data if meta_data else {}
 
     def __str__(self):
         return (f"CenterSummary: {self.name}, "
@@ -46,6 +49,7 @@ class CenterSummary:
                 f"Ownership: {self.ownership}"
                 f"Created At: {self.created_at}, "
                 f"Updated At: {self.updated_at}"
+                f"Meta Data: {self.meta_data}"
                 )
 
     def to_dict(self):
@@ -61,6 +65,7 @@ class CenterSummary:
             "institution_type": self.institution_type.value,
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+            "meta_data": [meta.to_dict() for meta in self.meta_data] if self.meta_data else None,
         }
 
     def __eq__(self, other):
