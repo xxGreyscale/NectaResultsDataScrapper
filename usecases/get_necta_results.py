@@ -4,13 +4,15 @@ import application.extraction.htmlextract as html_e
 import application.parser.content_parser_mapper as m
 from application.center.services.storage_client import CenterStorageClient
 from application.extraction.xlsx_extractor import XlsxExtractor
+from application.results.services.data_aggregation import DataAggregation
 from application.results.services.mappers.result_mapper import ResultMapper
-from application.results.services.mappers.result_summary_mapper import ResultSummaryMapper
 from application.results.services.storage_client import ResultStorageClient
 from common.Domain.centersummary import CenterSummary
 from common.Domain.necta_year import NectaYear, NectaYearCenterSummary
+from common.Domain.result import NectaACSEEResult
 from common.Enumerations.exam_type import ExamTypeEnum
 from common.Primitives.center_id import CenterId
+from tqdm import tqdm
 
 PATH_TO_SECONDARY_SCHOOL_ENROLMENT = 'resource/2004/enrolment/Secondary_by_Age_and_Sex.xlsx'
 
@@ -26,24 +28,30 @@ def get_and_save_acsee_results(url: str, level: str, years: [int]) -> [NectaYear
     """""
     extractor = html_e.HtmlExtract()
     content_mapper = m.ContentParserMapper()
-    centers_with_results: [CenterSummary, list] = []
     xlsx_extractor = XlsxExtractor()
     secondary_enrollment_df = xlsx_extractor.extract(PATH_TO_SECONDARY_SCHOOL_ENROLMENT)
     # minimize columns to School name, Reg. no, Ownership, Ward, Region and Council
     secondary_enrollment_df = (
         secondary_enrollment_df)[['School Name', 'Reg. No', 'Ownership', 'Ward', 'Region', 'Council']]
+
+    ranged_years_results = [] # Does not necessarily need it but we want to return something
     for year in years:
-        posted_date = datetime.datetime(year, 7, 14)
-        yearly_records = NectaYear(year=year, exam_type=ExamTypeEnum[level], centers=[], posted_date=posted_date)
-        url = url + level + str(year) + "/"
-        reg_filter = re.compile(r"^s[0-9]{4}\.htm$")
-        links = extractor.get_result_links_from_url(url, reg_filter)
-        print(len(links))
-        if len(links) < 1:
-            RuntimeWarning(f"No links found for {year} {level} at {url}")
+        # Let's skip year 2015 and 2008.
+        # Year 2015 they used a Distinction Merit system
+        # Yeah 2008 is not available
+        if year == 2015 or year == 2008:
             continue
-        for link in links:
-            link_url = url + link.get("href")
+        posted_date = datetime.datetime(year, 7, 14)
+        centers_with_results: [CenterSummary, list[NectaACSEEResult]] = []
+        yearly_records = NectaYear(year=year, exam_type=ExamTypeEnum[level], centers=[], posted_date=posted_date)
+        constructed_url = url + level + str(year) + "/"
+        reg_filter = re.compile(r"^s[0-9]{4}\.htm$")
+        links = extractor.get_result_links_from_url(constructed_url, reg_filter)
+        if len(links) < 1:
+            RuntimeWarning(f"No links found for {year} {level} at {constructed_url}")
+            continue
+        for link in tqdm(links[100:120], desc=f"Taking results from year {year}:", colour="green", total=len(links)):
+            link_url = constructed_url + link.get("href")
             center_name = " ".join(link.text.strip().split(" ")[1:])
             center_internal_id = CenterId().generate()
             exam_center = CenterSummary(name=center_name, id=center_internal_id)
@@ -68,29 +76,35 @@ def get_and_save_acsee_results(url: str, level: str, years: [int]) -> [NectaYear
             exam_center.necta_reg_no = link.text.strip().split(" ")[0]
             tables = extractor.get_tables(url=link_url)
 
-            center_results = ResultMapper().acsee_result_mapping(content_mapper.parse_table(tables[2]), year)
-            center_result_summary = ResultSummaryMapper().from_raw_parsed_table_data(
-                content_mapper.parse_table(tables[0]))
+            # Some websites have different table structures
+            #  For websites from 2005 -> 2018, the results are in the first table
+            #  For websites from 2020 -> 2024, the results are in the third table
+            # And some websites have more than 3 tables
+            if len(tables) == 0:
+                RuntimeWarning(f"No tables found for {year} {level} at {link_url}")
+                continue
+            if year < 2020:
+                center_results = ResultMapper().acsee_result_mapping(content_mapper.parse_table(tables[0]), year)
+            else:
+                center_results = ResultMapper().acsee_result_mapping(content_mapper.parse_table(tables[2]), year)
+
+            # Get the aggregated result as a summary for each center
+            center_result_summary = DataAggregation().aggregate_result_summary_by_gender(center_results)
 
             centers_with_results.append([exam_center, center_results])
-            print(len(centers_with_results))
             yearly_records.centers.append(NectaYearCenterSummary(center=exam_center,
                                                                  result_summary=center_result_summary))
         yearly_records.total_centers = len(yearly_records.centers)
-        # Take exam center only
-        to_save_centers = [center for center, _ in centers_with_results]
-        results_to_save = [results for _, results in centers_with_results]
 
-        center_storage_client = CenterStorageClient()
-        result_storage_client = ResultStorageClient()
         # Save the centers to db
-        center_storage_client.save_centers(to_save_centers)
+        CenterStorageClient().save_centers([center for center, _ in centers_with_results])
         # Save the results to db
-        # result_storage_client.save_acsee_results(results_to_save)
+        ResultStorageClient().save_acsee_results([results for _, results in centers_with_results])
         # Save the results summary to db
-        # result_storage_client.save_acsee_year_result_summary(yearly_records)
+        ResultStorageClient().save_acsee_year_result_summary(yearly_records)
+        ranged_years_results.append([yearly_records, centers_with_results])
 
-        return [yearly_records, centers_with_results]
+    return ranged_years_results
 
 
 def flexible_search_patterns(name):
