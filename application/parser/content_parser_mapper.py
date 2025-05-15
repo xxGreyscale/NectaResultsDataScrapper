@@ -14,12 +14,23 @@ class ContentParserMapper:
                     headers.append(header.text.strip())
             else:
                 row_data = {}
-                for row_index, data in enumerate(row.find_all('td')):
-                    if headers[row_index] == 'DETAILED SUBJECTS':
-                        row_data[headers[row_index]] = ContentParserMapper.detailed_subjects_mapper(data.text.strip())
-                        continue
-                    row_data[headers[row_index]] = data.text.strip()
-                table_object.append(row_data)
+                for row_index, data_cell in enumerate(row.find_all('td')):
+                    # Extract text, discarding HTML tags using a loop for robustness
+                    cell_text = ""
+                    for content in data_cell.contents:  # Iterate through cell's children
+                        if isinstance(content, str):  # If it's a string, add it
+                            cell_text += content
+                        else:
+                            cell_text += content.get_text(separator=" ")
+                    cell_text = cell_text.strip()
+
+                    if cell_text:
+                        if headers[row_index] == 'DETAILED SUBJECTS':
+                            row_data[headers[row_index]] = ContentParserMapper.detailed_subjects_mapper(cell_text)
+                        else:
+                            row_data[headers[row_index]] = cell_text
+                if row_data:
+                    table_object.append(row_data)
         return table_object
 
     @staticmethod
