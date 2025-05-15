@@ -13,10 +13,11 @@ class ResultMapper:
                 year=year,
                 index_number=result["CNO"].split("/")[1],
                 exam_center=result["CNO"].split("/")[0],
-                division=DivisionEnum(result["DIV"]),
-                sex=SexEnum(result["SEX"]),
-                aggregate=result["AGGT"],
-                subjects=self.acsee_subject_grade_mapping(result["DETAILED SUBJECTS"]),
+                division=DivisionEnum("0") if result.get("DIV", DivisionEnum.NONE)
+                                              in ("0", "FLD") else DivisionEnum(result.get("DIV", DivisionEnum.NONE)),
+                sex=SexEnum(result.get("SEX")) if isinstance(result.get("SEX"), str) and result.get("SEX") == 'M' or result.get("SEX") == 'F' else SexEnum.NONE,
+                aggregate=result.get("AGG", 0),
+                subjects=self.acsee_subject_grade_mapping(result.get("DETAILED SUBJECTS", {})),
             ), necta_raw_results))
         except Exception as e:
             raise ValueError(f"Error mapping NECTA results: {e}")
