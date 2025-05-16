@@ -11,8 +11,8 @@ class ResultMapper:
         try:
             return list(map(lambda result: NectaACSEEResult(
                 year=year,
-                index_number=result["CNO"].split("/")[1],
-                exam_center=result["CNO"].split("/")[0],
+                index_number=result["CNO"].split("/")[1] if result.get("CNO") else None,
+                exam_center=result["CNO"].split("/")[0] if result.get("CNO") else None,
                 division=DivisionEnum("0") if result.get("DIV", DivisionEnum.NONE)
                                               in ("0", "FLD") else DivisionEnum(result.get("DIV", DivisionEnum.NONE)),
                 sex=SexEnum(result.get("SEX")) if isinstance(result.get("SEX"), str) and result.get("SEX") == 'M' or result.get("SEX") == 'F' else SexEnum.NONE,
