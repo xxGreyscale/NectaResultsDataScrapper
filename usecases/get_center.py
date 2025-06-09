@@ -9,7 +9,14 @@ PATH_TO_SECONDARY_SCHOOL_ENROLMENT = 'resource/2004/enrolment/Secondary_by_Age_a
 MATCHING_THRESHOLD = 90
 
 
-def create_exam_center(link, center_storage_client: CenterStorageClient) -> CenterSummary:
+def get_exam_center(link, center_storage_client: CenterStorageClient) -> CenterSummary:
+    """
+    This function retrieves an exam center from the NECTA website. Then checks in repository of schools
+    from the statistics bureau and save in DB. If it already exists in db then it returns the existing one.
+    :param link:
+    :param center_storage_client:
+    :return:
+    """
     center_name = " ".join(link.text.strip().split(" ")[1:])
     necta_reg_no = link.text.strip().split(" ")[0]
 

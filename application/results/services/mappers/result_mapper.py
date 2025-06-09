@@ -7,17 +7,16 @@ from common.Enumerations.subject import ACSEESubjectEnum
 
 
 class ResultMapper:
-    def acsee_result_mapping(self, necta_raw_results: list, year) -> [NectaACSEEResult]:
+    def acsee_result_mapping(self, center_no: str, necta_raw_results: list, year) -> [NectaACSEEResult]:
         try:
             return list(map(lambda result: NectaACSEEResult(
                 year=year,
-                index_number=result["CNO"].split("/")[1] if result.get("CNO") else None,
-                exam_center=result["CNO"].split("/")[0] if result.get("CNO") else None,
-                division=DivisionEnum("0") if result.get("DIV", DivisionEnum.NONE)
-                                              in ("0", "FLD") else DivisionEnum(result.get("DIV", DivisionEnum.NONE)),
-                sex=SexEnum(result.get("SEX")) if isinstance(result.get("SEX"), str) and result.get("SEX") == 'M' or result.get("SEX") == 'F' else SexEnum.NONE,
-                aggregate=result.get("AGG", 0),
-                subjects=self.acsee_subject_grade_mapping(result.get("DETAILED SUBJECTS", {})),
+                index_number=result["CNO"].split("/")[1] if len(result.get("CNO").split("/")) > 1 else result.get("CNO"),
+                exam_center=center_no,
+                division=DivisionEnum.from_string(result.get("DIV")) if result.get("DIV") is not None else None,
+                sex = SexEnum(result.get("SEX")) if result.get("SEX") in ("M", "F", "None") else SexEnum.NONE,
+                aggregate=result.get("AGGT", 0),
+                subjects=self.acsee_subject_grade_mapping(result.get("DETAILED SUBJECTS")),
             ), necta_raw_results))
         except Exception as e:
             raise ValueError(f"Error mapping NECTA results: {e}")
@@ -30,7 +29,7 @@ class ResultMapper:
         :return: A dictionary with subject names as keys and grades as values
         """""
         result = []
-        for key, value in subject_grades.items():
+        for key, value in subject_grades.items() if subject_grades is not None else {}.items():
             result.append(ACSEESubjectAndGrade(subject=ACSEESubjectEnum.from_value_or_abbr(key),
                                                grade=GradeEnum.from_value_or_abbr(value)))
         return result
@@ -38,7 +37,7 @@ class ResultMapper:
     @staticmethod
     def acsee_to_document(domain: NectaACSEEResult) -> ResultDocument:
         return ResultDocument(
-            identifiers=ResultDocumentIdentifiers(index_number=domain.exam_center + "/" + domain.index_number),
+            identifiers=ResultDocumentIdentifiers(index_number=domain.exam_center + "/" + domain.index_number) if domain.index_number and domain.exam_center else None,
             current=CurrentResultDocument(
                 year=domain.year,
                 sex=domain.sex,
