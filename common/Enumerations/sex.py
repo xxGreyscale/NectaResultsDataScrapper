@@ -16,9 +16,10 @@ class SexEnum(str, Enum):
         return self.label
 
     def __eq__(self, other):
-        if isinstance(other, str):
-            return self._value_ == other
-        elif isinstance(other, SexEnum):
-            return self._value_ == other._value_
-        return False
+        if not isinstance(other, SexEnum):
+            return NotImplemented
+        return self._value_ == other._value_
+
+    def __hash__(self):
+        return hash(self._value_)
 
