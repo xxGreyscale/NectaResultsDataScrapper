@@ -12,7 +12,7 @@ class CenterMapper:
     def to_document_object(center_summary: CenterSummary, changeLogs: list[ChangeLog]) -> CenterDocument:
         return CenterDocument(
             identifiers=CenterIdentifiers(
-                center_id=center_summary.id.value(),
+                centerId=center_summary.id.value(),
                 schoolRegistrationNo=center_summary.school_registration_number,
                 nectaRegistrationNo=center_summary.necta_reg_no
             ),
@@ -34,7 +34,7 @@ class CenterMapper:
     @staticmethod
     def to_domain(center_document: CenterDocument) -> CenterSummary:
         return CenterSummary(
-            id=CenterId(center_document.identifiers.center_id),
+            id=CenterId(center_document.identifiers.centerId),
             name=center_document.current.name,
             school_registration_number=center_document.identifiers.schoolRegistrationNo,
             necta_reg_no=center_document.identifiers.nectaRegistrationNo,
