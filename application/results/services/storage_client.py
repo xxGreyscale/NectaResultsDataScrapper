@@ -27,6 +27,8 @@ class ResultStorageClient:
                 for result in center_results:
                     if not isinstance(result, NectaACSEEResult):
                         raise TypeError("Expected NectaACSEEResult instance. but got: " + str(type(result)))
+                    if not result.index_number and not result.exam_center:
+                        continue
                     saved_result = self.result_repository.get_acsee_results_by_index_number(
                         result.exam_center + "/" + result.index_number)
                     if saved_result:
@@ -34,11 +36,10 @@ class ResultStorageClient:
                         continue
                     doc = self.result_mapper.acsee_to_document(result)
                     multi_docs.append(doc)
-            if multi_docs:
-                return self.result_repository.save_acsee_results(multi_docs)
-            else:
+            if not multi_docs:
                 print("No new results to save")
                 return False
+            return self.result_repository.save_acsee_results(multi_docs)
         except Exception as e:
             print(f"Error saving results: {e}")
             raise RuntimeError(f"Error saving results: {e}")
