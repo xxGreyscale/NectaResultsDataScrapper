@@ -15,7 +15,6 @@ class DataAggregation:
             results_by_division[division] = [
                 r for r in center_results if r.division == division
             ]
-
         return CandidatesResultSummary(
             id=ResultSummaryId().generate(),
             division_one=self._specific_division_summary_by_gender(results_by_division.get(DivisionEnum.I, [])),
