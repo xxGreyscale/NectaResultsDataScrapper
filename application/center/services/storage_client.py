@@ -1,6 +1,6 @@
 
 from application.center.repository.center_repository import CenterRepository
-from application.center.repository.entities.center import ChangeLog
+from application.center.repository.entities.center import ChangeLog, CenterDocument
 from application.center.services.center_mappers import CenterMapper
 from common.Domain.centersummary import CenterSummary
 from common.Enumerations.log_action_enum import ActionToChangeEnum
@@ -10,6 +10,15 @@ class CenterStorageClient:
     def __init__(self):
         self.center_repository = CenterRepository()
         self.center_mapper = CenterMapper()
+
+    def save_center(self, center: CenterSummary) -> CenterSummary:
+        try:
+            change_logs = [ChangeLog(ActionToChangeEnum.CREATE)]
+            center_doc = self.center_repository.create_center(self.center_mapper.to_document_object(center, change_logs))
+            return self.center_mapper.to_domain(center_doc)
+        except Exception as e:
+            print(f"Error saving centers: {e}")
+            raise RuntimeError(f"Error saving centers: {e}")
 
     def save_centers(self, centers: list[CenterSummary]) -> bool:
         """
@@ -52,7 +61,7 @@ class CenterStorageClient:
             print(f"Error getting centers: {e}")
             raise RuntimeError(f"Error getting centers: {e}")
 
-    def get_by_necta_reg_no(self, necta_reg_no):
+    def get_by_necta_reg_no(self, necta_reg_no) -> CenterSummary:
         """
         Get center by necta registration number
         :param necta_reg_no:
@@ -60,7 +69,7 @@ class CenterStorageClient:
         """
         try:
             center = self.center_repository.get_center_by_necta_reg_no(necta_reg_no)
-            return center
+            return self.center_mapper.to_domain(CenterDocument.from_dict(center)) if center else None
         except Exception as e:
             print(f"Error getting center by necta registration number: {e}")
             raise RuntimeError(f"Error getting center by necta registration number: {e}")
