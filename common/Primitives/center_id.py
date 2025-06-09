@@ -16,12 +16,12 @@ class CenterId:
         :param center_id:
         If provided, validate then use this as the center ID.
         """
-        if center_id and len(center_id) != 12:
-            raise ValueError("Center ID must be 12 characters long.")
         if center_id and not center_id.startswith("CE-"):
             raise ValueError("Center ID must start with 'CE-'.")
         if center_id and not center_id[3:].isalnum():
             raise ValueError("Center ID must contain only alphanumeric characters after 'CE-'.")
+        if center_id and len(center_id[3:]) != 10:
+            raise ValueError("Center ID must be 10 characters long.")
         self.id = center_id
 
     def __str__(self):
