@@ -8,7 +8,6 @@ from pandas import DataFrame
 from application.scrapper.exceptions.website_fetch_error import WebsiteFetchError
 
 
-FALL_BACK_PATH = "/alevel.html"
 class Fetcher:
     def __init__(self):
         pass
@@ -28,18 +27,18 @@ class Fetcher:
         """""
         try:
             return self._fetch_html(url)
-        except requests.exceptions.RequestException as initial_e:
-            # Try adding a fallback mechanism, some urls have alevel.html at the end
-            # Add the alevel.html and try again
-            fallback_url = url.rstrip('/') + FALL_BACK_PATH # Construct fallback URL
-            try:
-                return self._fetch_html(fallback_url)
-            except requests.exceptions.RequestException as fallback_e:
-                # warnings.warn(f"Error fetching initial URL '{url}': {fallback_e}", RuntimeWarning)
-                return BeautifulSoup("", 'html.parser')  # Return empty soup if fallback fails
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                # warnings.warn(f"Error fetching initial URL '{url}': {e}", RuntimeWarning)
+                print(f"Error fetching initial URL '{url}': {e}")
+                return BeautifulSoup("", 'html.parser')
+            elif e.response.status_code == 500:
+                warnings.warn(f"Error fetching initial URL '{url}': {e}", RuntimeWarning)
+                return BeautifulSoup("", 'html.parser')
+            else:
+                raise WebsiteFetchError(f"HTTP error: {e}")
         except Exception as e:
-            # warnings.warn(f"Error fetching initial URL '{url}': {e}", RuntimeWarning)
-            raise WebsiteFetchError(f"Error fetching URL: {e}")
+            raise WebsiteFetchError(f"HTTP error: {e}")
 
     @staticmethod
     def from_xlsx(file_path) -> DataFrame:
