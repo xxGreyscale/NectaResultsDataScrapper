@@ -15,6 +15,7 @@ class CenterDocument:
             change_logs: list[ChangeLog] = None,
             created_at: datetime = None,
             updated_at: datetime = None,
+            metadata: list[Metadata] = None,
     ):
         self.identifiers = identifiers
         self.current = current
@@ -23,6 +24,7 @@ class CenterDocument:
         self.change_logs = change_logs if change_logs else []
         self.created_at = created_at if created_at else datetime.now()
         self.updated_at = updated_at if updated_at else datetime.now()
+        self.metadata = metadata if metadata else []
 
     def to_dict(self):
         return {
@@ -33,6 +35,7 @@ class CenterDocument:
             "changeLogs": [change_log.to_dict() for change_log in self.change_logs] if self.change_logs else None,
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+            "metadata": [metadata.to_dict() for metadata in self.metadata] if self.metadata else None,
         }
 
     @staticmethod
@@ -45,18 +48,19 @@ class CenterDocument:
             change_logs=[ChangeLog.from_dict(item) for item in data["changeLogs"]] if data.get("changeLogs") else None,
             created_at=datetime.fromisoformat(data["createdAt"]) if data.get("createdAt") else None,
             updated_at=datetime.fromisoformat(data["updatedAt"]) if data.get("updatedAt") else None,
+            metadata=[Metadata.from_dict(item) for item in data["metadata"]] if data.get("metadata") else None,
         )
 
 
 class CenterIdentifiers:
-    def __init__(self, center_id: str, schoolRegistrationNo: str, nectaRegistrationNo: str):
-        self.center_id = center_id
+    def __init__(self, centerId: str, schoolRegistrationNo: str, nectaRegistrationNo: str):
+        self.centerId = centerId
         self.schoolRegistrationNo = schoolRegistrationNo
         self.nectaRegistrationNo = nectaRegistrationNo
 
     def to_dict(self):
         return {
-            "centerId": self.center_id,
+            "centerId": self.centerId,
             "schoolRegistrationNo": self.schoolRegistrationNo,
             "nectaRegistrationNo": self.nectaRegistrationNo
         }
@@ -64,7 +68,7 @@ class CenterIdentifiers:
     @staticmethod
     def from_dict(data: dict) -> 'CenterIdentifiers':
         return CenterIdentifiers(
-            center_id=data.get("centerId"),
+            centerId=data.get("centerId"),
             schoolRegistrationNo=data.get("schoolRegistrationNo"),
             nectaRegistrationNo=data.get("nectaRegistrationNo")
         )
