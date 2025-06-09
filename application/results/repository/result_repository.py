@@ -1,7 +1,4 @@
-from pymongo.synchronous.database import Database
-
 from application.results.repository.entities.results_document import ResultDocument
-from common.Domain.result import NectaACSEEResult
 from infastructure.database_config import get_database
 
 
