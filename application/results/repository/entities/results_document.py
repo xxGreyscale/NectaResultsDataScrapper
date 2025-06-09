@@ -6,7 +6,7 @@ from common.Enumerations.small_enumarations import DivisionEnum
 
 
 class ResultDocumentIdentifiers:
-    def __init__(self, index_number: str):
+    def __init__(self, index_number: str = None):
         self.index_number = index_number
 
     def __str__(self):
