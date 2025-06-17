@@ -21,7 +21,9 @@ class Metadata:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> 'Metadata':
+    def from_dict(data) -> 'Metadata':
+        if not isinstance(data, dict): # Because somehow we get an Object sometimes ://
+            return Metadata()
         return Metadata(
             key=data.get("key"),
             value=data.get("value"),
