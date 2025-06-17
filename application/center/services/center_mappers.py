@@ -45,5 +45,5 @@ class CenterMapper:
             institution_type=center_document.current.institutionType,
             created_at=center_document.created_at,
             updated_at=center_document.updated_at,
-            meta_data=[Metadata.from_dict(item) for item in center_document.metadata] if center_document.metadata else None,
+            meta_data=[Metadata.from_dict(item) for item in center_document.current.metadata] if center_document.current.metadata else None,
         )
