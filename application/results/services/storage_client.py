@@ -76,3 +76,15 @@ class ResultStorageClient:
         except Exception as e:
             print(f"Error saving results: {e}")
             raise RuntimeError(f"Error saving results: {e}")
+
+    def get_all_acsee_centers_results_summary(self) -> any:
+        """
+        :return:
+        """
+        try:
+            print("Getting all centers results summary..")
+            # @TODO(refactor): Use a more specific return type instead of any
+            # @TODO(refactor): Do proper mapping of the results to a specific type
+            return self.result_summary_repo.get_acsee_summary_results()
+        except Exception as e:
+            print(f"Error occurred: {e}")
