@@ -9,15 +9,43 @@ class ResultSummaryRepository:
         except Exception as e:
             RuntimeWarning(f"Error connecting to database: {e}")
 
-    def get_acsee_summary(self, year) -> ResultSummaryDocument:
+    def get_acsee_summary_results(self) -> any:
         """
-        Get a summary of ACSEE results for a specific year.
-        :param year: The year for which to retrieve the summary.
         :return: A dictionary containing the summary data.
         """
         try:
-            result = self.db["acsee_result_summary"].find_one({"year": year})
-            return result
+            pipeline = [
+                {
+                    "$lookup": {
+                        "from": "necta_centers",
+                        "localField": "centerId",
+                        "foreignField": "identifiers.centerId",
+                        "as": "centerDetails"
+                    }
+                },
+                {
+                    "$unwind": "$centerDetails",
+                },
+                {
+                    "$project": {
+                        "year": 1,
+                        "postedFate": 1,
+                        "examType": 1,
+                        "candidatesResultSummary": 1,
+                        "schoolRegistration": "$centerDetails.identifier.schoolRegistrationNo",
+                        "nectaRegistration": "$centerDetails.identifier.nectaRegistrationNo",
+                        "name": "$centerDetails.current.name",
+                        "region": "$centerDetails.current.region",
+                        "council": "$centerDetails.current.council",
+                        "ward": "$centerDetails.current.ward", 
+                        "ownership": "$centerDetails.current.ownership",
+                        "institutionType": "$centerDetails.current.institutionType",
+                        "metadata": "$centerDetails.current.metadata",
+                    }
+                }
+            ]
+            results = self.db["acsee_result_summary"].aggregate(pipeline)
+            return results
         except Exception as e:
             RuntimeWarning(f"Error getting ACSEE summary: {e}")
 
