@@ -34,3 +34,13 @@ class ResultRepository:
         except Exception as e:
             print(f"Error getting result by index number: {e}")
             raise RuntimeError(f"Error getting result by index number: {e}")
+
+    def get_all_acsee_results(self) -> list[ResultDocument]:
+        """
+        Get all acsee results
+        :return:
+        """
+        try:
+            return self.acsee_collection.find().collection
+        except Exception as e:
+            print(f"Error getting all acsee results with error: {e}")
