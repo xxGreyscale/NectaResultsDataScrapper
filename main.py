@@ -1,6 +1,6 @@
 from infastructure.database_config import close_db_client
 from infastructure.setup_database import DbSetup
-from usecases.get_acsee_summary_results import results_summary_csv
+from usecases.generate_results_csv import generate_acsee_results_csv
 from usecases.get_necta_results import get_and_save_acsee_results
 import argparse
 
@@ -16,7 +16,8 @@ def get_necta_acsee_results(start_year: int = 2022, end_year: int = 2024):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # Make sure db is available
-    results_summary_csv() # Remove after debugging
+    # results_summary_csv() # Remove after debugging
+    generate_acsee_results_csv()
     # parser = argparse.ArgumentParser(
     #     description="A script to process NECTA data, generate CSVs, or extract Excel data."
     # )
