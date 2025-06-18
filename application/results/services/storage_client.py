@@ -88,3 +88,10 @@ class ResultStorageClient:
             return self.result_summary_repo.get_acsee_summary_results()
         except Exception as e:
             print(f"Error occurred: {e}")
+
+    def aggregated_acsee_results(self) -> any:
+        try:
+            print(f"Getting all acsee results..")
+            return self.result_repository.get_aggregated_acsee_results()
+        except Exception as e:
+            print(f"Error occurred: {e}")

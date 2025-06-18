@@ -44,3 +44,56 @@ class ResultRepository:
             return self.acsee_collection.find().collection
         except Exception as e:
             print(f"Error getting all acsee results with error: {e}")
+
+    def get_aggregated_acsee_results(self) -> any:
+        try:
+            pipeline = [
+                {
+                    "$addFields": {
+                        "nectaRegistrationNoToMatch": {
+                            "$arrayElemAt": [
+                                {"$split": ["$identifiers.index_number", "/"]},
+                                0  # Get the second element (index 1) which is the ObjectId string
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "necta_centers",
+                        "localField": "nectaRegistrationNoToMatch",
+                        "foreignField": "identifiers.nectaRegistrationNo",
+                        "as": "centerDetails"
+                    }
+                },
+                {
+                    "$unwind": {
+                        "path": "$centerDetails",
+                        "preserveNullAndEmptyArrays": True
+                    }
+                },
+                {
+                    "$project": {
+                        "year": "$current.year",
+                        "sex": "$current.sex",
+                        "aggregate": "$current.aggregate",
+                        "division": "$current.division",
+                        "subjects": "$current.subjects",
+                        "indexNumber": "$identifiers.index_number",
+                        "schoolRegistration": "$centerDetails.identifier.schoolRegistrationNo",
+                        "nectaRegistration": "$centerDetails.identifier.nectaRegistrationNo",
+                        "schoolName": "$centerDetails.current.name",
+                        "region": "$centerDetails.current.region",
+                        "council": "$centerDetails.current.council",
+                        "ward": "$centerDetails.current.ward",
+                        "ownership": "$centerDetails.current.ownership",
+                        "institutionType": "$centerDetails.current.institutionType",
+                        "metadata": "$centerDetails.current.metadata",
+                    }
+                },
+            ]
+            results = self.acsee_collection.aggregate(pipeline)
+            return results
+        except Exception as e:
+            print(f"Error got: {e}")
+            RuntimeWarning(f"Error getting ACSEE summary: {e}")
