@@ -21,15 +21,17 @@ class NectaYearCenterSummary:
 
 
 class NectaYear:
+    centers: list[NectaYearCenterSummary]
+
     def __init__(self,
                  year: int,
-                 centers: [NectaYearCenterSummary] = None,
-                 exam_type: ExamTypeEnum = None,  # currently we have only CSEE and ACSEE
-                 posted_date: date = None,
-                 total_centers: int = None):
+                 centers: list[NectaYearCenterSummary] | None = None,
+                 exam_type: ExamTypeEnum | None = None,  # currently we have only CSEE and ACSEE
+                 posted_date: date | None = None,
+                 total_centers: int | None = None):
         self.year = year
         self.exam_type = exam_type
-        self.centers = centers
+        self.centers = centers or []
         self.total_centers = total_centers
         self.updated_at = date.today()
         self.posted_date = posted_date
@@ -38,7 +40,7 @@ class NectaYear:
         return {
             "year": self.year,
             "result_type": self.exam_type,
-            "centers": [center.to_dict() for center in self.centers],
+            "centers": [center.to_dict() for center in (self.centers or [])],
             "total_centers": self.total_centers,
             "posted_date": self.posted_date,
             "updated_at": self.updated_at

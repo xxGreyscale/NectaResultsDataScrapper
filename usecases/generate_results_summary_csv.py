@@ -1,14 +1,15 @@
 from application.results.services.file_generation import FileGeneration, standardize_division_key
 from application.results.services.storage_client import ResultStorageClient
 from common.helpers.flatten_dict import flatten_dict
+from infastructure import settings
 
 
-def results_summary_csv():
+def results_summary_csv(output_dir: str | None = None) -> str | None:
     results_storage_client = ResultStorageClient()
     summary_cursor = results_storage_client.get_all_acsee_centers_results_summary()
     if not summary_cursor:
         print("No results found")
-        return
+        return None
     try:
         summary = [_summary for _summary in summary_cursor]
         flat_dict = [flatten_dict(item) for item in summary if isinstance(item, dict)]
@@ -34,9 +35,47 @@ def results_summary_csv():
             if "postedFate" in item:
                 item["posted_date"] = item.pop("postedFate")
         fieldnames = [key for key in flat_dict[0].keys()] if flat_dict else []
-        FileGeneration.generate_csv(flat_dict, fieldnames, "/Users/salinastic/PycharmProjects/necta/resource/csv"
-                                                           "/acsee_results_summary.csv")
-        print("CSV file generated successfully at ../resource/csv/acsee_results_summary.csv")
+        output_dir = output_dir or settings.EXPORT_DIR
+        file_path = f"{output_dir}/acsee_results_summary.csv"
+        FileGeneration.generate_csv(flat_dict, fieldnames, file_path)
+        print(f"CSV file generated successfully at {file_path}")
+        return file_path
     except Exception as e:
         print(f"Error generating CSV file: {e}")
-        return
+        return None
+
+
+def results_summary_csee_csv(output_dir: str | None = None) -> str | None:
+    results_storage_client = ResultStorageClient()
+    summary_cursor = results_storage_client.get_all_csee_centers_results_summary()
+    if not summary_cursor:
+        print("No results found")
+        return None
+    try:
+        summary = [_summary for _summary in summary_cursor]
+        flat_dict = [flatten_dict(item) for item in summary if isinstance(item, dict)]
+        for item in flat_dict:
+            if not isinstance(item, dict):
+                raise TypeError("Expected a dictionary item in the data list.")
+
+            keys_to_rename = []
+            for k in item.keys():
+                if k.startswith("candidatesResultSummary_"):
+                    keys_to_rename.append(k)
+
+            for old_key in keys_to_rename:
+                new_key = old_key.replace("candidatesResultSummary_", "")
+                new_key = standardize_division_key(new_key)
+                item[new_key] = item.pop(old_key)
+
+            if "postedFate" in item:
+                item["posted_date"] = item.pop("postedFate")
+        fieldnames = [key for key in flat_dict[0].keys()] if flat_dict else []
+        output_dir = output_dir or settings.EXPORT_DIR
+        file_path = f"{output_dir}/csee_results_summary.csv"
+        FileGeneration.generate_csv(flat_dict, fieldnames, file_path)
+        print(f"CSV file generated successfully at {file_path}")
+        return file_path
+    except Exception as e:
+        print(f"Error generating CSV file: {e}")
+        return None

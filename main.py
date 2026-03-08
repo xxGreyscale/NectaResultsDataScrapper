@@ -1,7 +1,7 @@
 from infastructure.database_config import close_db_client
 from infastructure.setup_database import DbSetup
-from usecases.generate_results_csv import generate_acsee_results_csv
-from usecases.get_necta_results import get_and_save_acsee_results
+from usecases.generate_results_csv import generate_acsee_results_csv, generate_csee_results_csv
+from usecases.get_necta_results import get_and_save_acsee_results, get_and_save_csee_results
 import argparse
 
 
@@ -10,6 +10,14 @@ def get_necta_acsee_results(start_year: int = 2022, end_year: int = 2024):
     years = [year for year in range(start_year, end_year)]
     DbSetup().setup_indices()
     get_and_save_acsee_results(url, "ACSEE", years)
+    close_db_client()
+
+
+def get_necta_csee_results(start_year: int = 2022, end_year: int = 2024):
+    url = "https://maktaba.tetea.org/exam-results/"
+    years = [year for year in range(start_year, end_year)]
+    DbSetup().setup_indices()
+    get_and_save_csee_results(url, "CSEE", years)
     close_db_client()
 
 

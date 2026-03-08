@@ -32,7 +32,8 @@ class CenterMapper:
         )
 
     @staticmethod
-    def to_domain(center_document: CenterDocument) -> CenterSummary:
+    def to_domain(dict_center_document: dict) -> CenterSummary:
+        center_document = CenterDocument.from_dict(dict_center_document)
         return CenterSummary(
             id=CenterId(center_document.identifiers.centerId),
             name=center_document.current.name,
@@ -45,5 +46,5 @@ class CenterMapper:
             institution_type=center_document.current.institutionType,
             created_at=center_document.created_at,
             updated_at=center_document.updated_at,
-            meta_data=[Metadata.from_dict(item) for item in center_document.current.metadata] if center_document.current.metadata else None,
+            meta_data=center_document.current.metadata if center_document.current.metadata else None,
         )

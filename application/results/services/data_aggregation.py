@@ -1,4 +1,4 @@
-from common.Domain.result import NectaACSEEResult
+from common.Domain.result import NectaACSEEResult, NectaCSEEResult
 from common.Domain.result_summary import CandidatesResultSummary, PerDivisionSummary
 from common.Enumerations.sex import SexEnum
 from common.Enumerations.small_enumarations import DivisionEnum
@@ -9,7 +9,10 @@ class DataAggregation:
     def __init__(self):
         pass
 
-    def aggregate_result_summary_by_gender(self, center_results: list[NectaACSEEResult]) -> CandidatesResultSummary:
+    def aggregate_result_summary_by_gender(
+        self,
+        center_results: list[NectaACSEEResult] | list[NectaCSEEResult]
+    ) -> CandidatesResultSummary:
         results_by_division = {}
         for division in DivisionEnum:
             results_by_division[division] = [
@@ -30,7 +33,9 @@ class DataAggregation:
         )
 
     @staticmethod
-    def _specific_division_summary_by_gender(specific_division_category: list[NectaACSEEResult]) -> PerDivisionSummary:
+    def _specific_division_summary_by_gender(
+        specific_division_category: list[NectaACSEEResult] | list[NectaCSEEResult]
+    ) -> PerDivisionSummary:
         return PerDivisionSummary(
             males=sum(1 for candidate_result in specific_division_category if candidate_result.sex == SexEnum.MALE),
             females=sum(1 for candidate_result in specific_division_category if candidate_result.sex == SexEnum.FEMALE),
